@@ -1,6 +1,11 @@
 <template>
   <div class="container">
-    <input type="text" placeholder="Upuść pliki lub uzyj przycisku obok" />
+    <input
+      type="text"
+      placeholder="Upuść pliki lub uzyj przycisku obok"
+      @dragover="dragoverFiles"
+      @drop="dropFiles"
+    />
     <input
       type="file"
       multiple
@@ -10,7 +15,9 @@
     />
     <label class="add-files-label" for="filesToCompress">Dodaj</label>
     {{ initialImages }}
-    <Image :imageFile="imageFile"/>
+    <div v-for="(image, index) in initialImages" :key="index">
+      <Image :imageFile="image" />
+    </div>
   </div>
 </template>
 
@@ -19,13 +26,11 @@ import { defineComponent } from "vue";
 import Compressor from "compressorjs";
 import Image from "./Image.vue";
 import { ImageFile } from "../types";
-//import Image from "./Image.vue";
-
 
 export default defineComponent({
   name: "Main",
   components: {
-    Image
+    Image,
   },
   data() {
     return {
@@ -42,8 +47,8 @@ export default defineComponent({
     };
   },
   methods: {
-    uploadImage(selectedImages: FileList | null) {
-      if (selectedImages != null) {
+    uploadImage(selectedImages: FileList | null | undefined) {
+      if (selectedImages) {
         Array.from(selectedImages).forEach((file) => {
           if (selectedImages.length < 1) {
             return;
@@ -55,7 +60,6 @@ export default defineComponent({
     },
     compressImage(file: File | Blob) {
       var self = this;
-      self.imageFile.file = file;
       new Compressor(file, {
         drew(ctx, canvas) {
           ctx.fillStyle = "#fff";
@@ -72,14 +76,12 @@ export default defineComponent({
         quality: Number(self.options.quality),
         convertSize: 2000000,
         success(result) {
-          console.log(file);
-          console.log(result);
-          self.imageFile.compressedImage = result;
-          self.imageFile.savedOnCompression = self.getCompressionSize(
-            result.size,
-            file.size
-          );
-          self.initialImages.push(self.imageFile);
+          var imageFile: ImageFile = {
+            file: file,
+            compressedImage: result,
+            savedOnCompression: self.getCompressionSize(result.size, file.size),
+          };
+          self.initialImages.push(imageFile);
         },
         error(err) {
           console.log(err.message);
@@ -100,9 +102,13 @@ export default defineComponent({
     getCompressionSize(resultSize: number, fileSize: number): string {
       return 100 - (resultSize / fileSize) * 100 + "%";
     },
-    getImageUrl(file: Blob | File): string {
-      return URL.createObjectURL(file);
-    }
+    dropFiles(e: DragEvent) {
+      e.preventDefault();
+      this.uploadImage(e.dataTransfer?.files);
+    },
+    dragoverFiles(e: Event) {
+      e.preventDefault();
+    },
   },
   mounted() {
     let filesHtmlElement = document.querySelector(
