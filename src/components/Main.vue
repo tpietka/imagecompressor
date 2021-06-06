@@ -31,12 +31,14 @@
     <div class="files-list">
       <template v-for="(file, index) in initialFiles" :key="index">
         <Image :index="index" :imageFile="file"
-        @remove-file="deleteFile"
-        @remove-all-files="deleteAllFiles"/>
+        @remove-file="deleteFile" />
       </template>
       <div class="additional-files-info" v-if="uploadedFiles">
         <div>
           Plików: {{ filesCount }}
+        </div>
+        <div @click="downloadAllFiles">
+          Pobierz wszystkie pliki
         </div>
         <div @click="deleteAllFiles">
           Usuń wszystkie pliki
@@ -51,6 +53,8 @@ import { defineComponent } from "vue";
 import Compressor from "compressorjs";
 import Image from "./Image.vue";
 import { ImageFile } from "../types";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 export default defineComponent({
   name: "Main",
@@ -109,6 +113,7 @@ export default defineComponent({
         convertSize: 2000000,
         success(result) {
           var imageFile: ImageFile = {
+            name: (file as File).name,
             file: file,
             compressedFile: result,
             savedOnCompression: self.getCompressionSize(result.size, file.size),
@@ -148,6 +153,17 @@ export default defineComponent({
     },
     deleteAllFiles() {
       this.initialFiles.length = 0;
+    },
+    downloadAllFiles() {
+      let zip = new JSZip();
+      let img = zip.folder("images");
+      this.initialFiles.forEach(file => {
+        img?.file(file.name, file.compressedFile);
+      });
+      zip.generateAsync({type:"blob"})
+        .then(function(content) {
+        saveAs(content, "files.zip");
+      });
     }
   },
   mounted() {

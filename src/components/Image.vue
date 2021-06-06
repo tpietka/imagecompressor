@@ -8,7 +8,7 @@
       {{ prettySize(imageFile?.compressedFile.size) }}
     </div>
     <div class="actions">
-      <img class="action-icon" src='../assets/download.svg'/>
+      <a :href="getImageUrl(imageFile?.compressedFile)" :download="imageFile?.compressedFile.name"><img class="action-icon" src='../assets/download.svg'/></a>
       <img @click="removeFile(index)" class="action-icon" src="../assets/delete.svg"/>
     </div>
   </div>
@@ -70,13 +70,14 @@ export default defineComponent({
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .image-container {
+  padding-top:5px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   .image-thumbnail {
+    margin-left:5px;
     .image {
-      margin-left:5px;
       width: 50px;
       height: 50px;
       object-fit: cover;
@@ -92,6 +93,10 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    a {
+      width:20px;
+      height:20px;
+    }
     .action-icon {
       width:20px;
       height:20px;
