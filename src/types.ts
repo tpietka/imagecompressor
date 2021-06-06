@@ -1,5 +1,6 @@
-export interface ImageFile extends File, Blob {
-    compressedImage: Blob;
+export interface ImageFile {
+    name: string,
+    compressedFile: Blob;
     file: File | Blob;
     savedOnCompression: string;
   }
