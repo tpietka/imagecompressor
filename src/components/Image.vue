@@ -37,6 +37,7 @@
 import { defineComponent, PropType } from "vue";
 import { ImageFile } from "../types";
 import Compare from "./Compare.vue";
+import { prettySize } from "../helpers/shared";
 export default defineComponent({
   components: { Compare },
   name: "Image",
@@ -58,20 +59,7 @@ export default defineComponent({
         return "";
       }
     },
-    prettySize(size: number | undefined): string {
-      let kilobyte = 1024;
-      let megabyte = kilobyte * kilobyte;
-      if (!size) {
-        return "N/A";
-      }
-      if (size > megabyte) {
-        return (size / megabyte).toFixed(2) + "MB";
-      } else if (size > kilobyte) {
-        return (size / kilobyte).toFixed(2) + "KB";
-      } else {
-        return size + "B";
-      }
-    },
+    prettySize: prettySize,
     removeFile(indexToDelete: number | undefined) {
       if (indexToDelete != undefined) {
         this.$emit("remove-file", indexToDelete);
@@ -97,8 +85,8 @@ export default defineComponent({
   .image-thumbnail {
     margin-left: 5px;
     .image {
-      width: 50px;
-      height: 50px;
+      width: 75px;
+      height: 75px;
       object-fit: cover;
       cursor: zoom-in;
       cursor: -webkit-zoom-in;

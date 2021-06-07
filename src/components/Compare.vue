@@ -12,6 +12,7 @@
 import { defineComponent, PropType } from "vue";
 import { ImageFile } from "../types";
 import ImageCompare from "image-compare-viewer";
+import { prettySize } from "../helpers/shared";
 
 export default defineComponent({
   name: "Compare",
@@ -38,8 +39,8 @@ export default defineComponent({
     const options = {
       showLabels: true,
       labelOptions: {
-        before: this.$parent.prettySize(this.image.file.size),
-        after: this.$parent.prettySize(this.image.compressedFile.size),
+        before: prettySize(this.image?.file.size),
+        after: prettySize(this.image?.compressedFile.size),
         onHover: false,
       },
     };
@@ -58,7 +59,7 @@ export default defineComponent({
   transform: translate(-50%, -50%);
   max-width: 100%;
   max-height: 100%;
-  width: auto;
+  width: 100%;
 }
 .modal-backdrop {
   z-index: 1090;
