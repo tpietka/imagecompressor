@@ -5,19 +5,16 @@
       class="quality-slider"
       type="range"
       v-model="options.quality"
-      min="0.5"
+      min="0.1"
       max="1.0"
       step="0.1"
     />
   </div>
   <div class="container">
-    <h1 class="title">Odkryj nowy wymiar kompresji plików jpg</h1>
+    <h1 class="title">Kompresuj pliki jpg</h1>
     <div class="submit-files">
-      <div class="files-input"
-        @dragover="dragoverFiles"
-        @drop="dropFiles"
-      >
-      Upuść tutaj pliki lub dodaj je klikając na przycisk
+      <div class="files-input" @dragover="dragoverFiles" @drop="dropFiles">
+        Upuść tutaj pliki lub dodaj je klikając na przycisk
       </div>
       <input
         type="file"
@@ -30,17 +27,14 @@
     </div>
     <div class="files-list">
       <template v-for="(file, index) in initialFiles" :key="index">
-        <Image :index="index" :imageFile="file"
-        @remove-file="deleteFile" />
+        <Image :index="index" :imageFile="file" @remove-file="deleteFile" />
       </template>
       <div class="additional-files-info" v-if="uploadedFiles">
-        <div>
-          Plików: {{ filesCount }}
-        </div>
-        <div @click="downloadAllFiles">
+        <div>Plików: {{ filesCount }}</div>
+        <div class="download-files" @click="downloadAllFiles">
           Pobierz wszystkie pliki
         </div>
-        <div @click="deleteAllFiles">
+        <div class="delete-files" @click="deleteAllFiles">
           Usuń wszystkie pliki
         </div>
       </div>
@@ -80,7 +74,7 @@ export default defineComponent({
     },
     filesCount(): number {
       return this.initialFiles.length;
-    }
+    },
   },
   methods: {
     uploadFile(selectedFiles: FileList | null | undefined) {
@@ -93,6 +87,8 @@ export default defineComponent({
           }
         });
       }
+      (document.querySelector("#filesToCompress") as HTMLInputElement).value =
+        "";
     },
     compressImage(file: File | Blob) {
       var self = this;
@@ -137,7 +133,9 @@ export default defineComponent({
       }
     },
     getCompressionSize(resultSize: number, fileSize: number): string {
-      return 100 - (resultSize / fileSize) * 100 + "%";
+      return (
+        (100 - (resultSize / fileSize) * 100).toString().substring(0, 4) + "%"
+      );
     },
     dropFiles(e: DragEvent) {
       e.preventDefault();
@@ -157,14 +155,13 @@ export default defineComponent({
     downloadAllFiles() {
       let zip = new JSZip();
       let img = zip.folder("images");
-      this.initialFiles.forEach(file => {
+      this.initialFiles.forEach((file) => {
         img?.file(file.name, file.compressedFile);
       });
-      zip.generateAsync({type:"blob"})
-        .then(function(content) {
+      zip.generateAsync({ type: "blob" }).then(function (content) {
         saveAs(content, "files.zip");
       });
-    }
+    },
   },
   mounted() {
     let filesHtmlElement = document.querySelector(
@@ -190,20 +187,20 @@ export default defineComponent({
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 50%;
+  width: 75%;
   @include centered-flex;
   flex-direction: column;
   .submit-files {
     @include centered-flex;
-    width:100%;
+    width: 100%;
   }
   .files-input {
     width: 100%;
-    font-size: 1.7vw;
+    font-size: 1.5vw;
     height: 50px;
     background-color: white;
     @include centered-flex;
-    cursor:auto;
+    cursor: auto;
   }
   .files-input:focus {
     outline-width: 0;
@@ -212,27 +209,27 @@ export default defineComponent({
     //background-image: linear-gradient(#ef3f5a, white);
     background-color: #ef3f5a;
     color: #fff;
-    width:5%;
-    height:50px;
+    width: 5%;
+    height: 50px;
     padding: 0 20px;
     @include centered-flex;
     cursor: pointer;
   }
   .add-files-label:hover {
-    background-color: #ef3f3f
+    background-color: #ef3f3f;
   }
   .files-list {
     width: 100%;
-    background-color:white;
-    display:flex;
+    background-color: white;
+    display: flex;
     flex-direction: column;
   }
   .additional-files-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-left:5px;
-    margin-right:10px;
+    margin-left: 5px;
+    margin-right: 10px;
   }
   .title {
     color: white;
@@ -241,7 +238,16 @@ export default defineComponent({
     position: relative;
     top: 40%;
     left: 50%;
-    width:100%;
+    width: 100%;
+  }
+  .additional-files-info {
+    font-size: 1.3vw;
+    .download-files {
+      cursor: pointer;
+    }
+    .delete-files {
+      cursor: pointer;
+    }
   }
 }
 </style>
