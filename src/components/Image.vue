@@ -18,7 +18,7 @@
       <!-- <img @click="updateFile(index)" class="action-icon" src="../assets/delete.svg"/> -->
       <a
         :href="getImageUrl(imageFile?.compressedFile)"
-        :download="imageFile?.compressedFile.name"
+        :download="imageFile?.name"
         ><img class="action-icon" src="../assets/download.svg"
       /></a>
       <img
