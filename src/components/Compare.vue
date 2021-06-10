@@ -1,11 +1,12 @@
 <template>
   <div class="modal">
+    <button class="close" @click="$emit('close-comparison')">X</button>
     <div id="image-compare">
       <img :src="url" alt="" />
       <img :src="compressedUrl" alt="" />
     </div>
   </div>
-  <a @click="$emit('close-comparison')" class="modal-backdrop"></a>
+  <a @click.self="$emit('close-comparison')" class="modal-backdrop"></a>
 </template>
 
 <script lang="ts">
@@ -43,6 +44,7 @@ export default defineComponent({
         after: prettySize(this.image?.compressedFile.size),
         onHover: false,
       },
+      fluidMode: true,
     };
     new ImageCompare(element, options).mount();
   },
@@ -70,14 +72,15 @@ export default defineComponent({
   bottom: 0;
   right: 0;
 }
-.img-left {
-  width: 50%;
-  height: auto;
-  object-fit: cover;
+#image-compare {
+  width: 95vw;
+  margin: auto;
+  height: 95vh;
 }
-.img-right {
-  width: 50%;
-  height: auto;
-  object-fit: cover;
+.close {
+  position: absolute;
+  right: 10px;
+  z-index: 4;
+  top: 0;
 }
 </style>
