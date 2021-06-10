@@ -25,35 +25,21 @@
       />
       <label class="add-files-label" for="filesToCompress">Dodaj</label>
     </div>
-    <div class="files-list">
-      <template v-for="(file, index) in initialFiles" :key="index">
-        <Image :index="index" :imageFile="file" @remove-file="deleteFile" />
-      </template>
-      <div class="additional-files-info" v-if="uploadedFiles">
-        <div>Plików: {{ filesCount }}</div>
-        <div class="download-files" @click="downloadAllFiles">
-          Pobierz wszystkie pliki
-        </div>
-        <div class="delete-files" @click="deleteAllFiles">
-          Usuń wszystkie pliki
-        </div>
-      </div>
-    </div>
+    <FileList v-model:files="initialFiles"></FileList>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import Compressor from "compressorjs";
-import Image from "./Image.vue";
 import { ImageFile } from "../types";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
+import { getFontSize, getCompressionSize } from "../helpers/shared";
+import FileList from "./FileList.vue";
 
 export default defineComponent({
   name: "Main",
   components: {
-    Image,
+    FileList,
   },
   data() {
     return {
@@ -69,9 +55,6 @@ export default defineComponent({
     };
   },
   computed: {
-    uploadedFiles(): boolean {
-      return this.initialFiles.length > 0;
-    },
     filesCount(): number {
       return this.initialFiles.length;
     },
@@ -95,7 +78,9 @@ export default defineComponent({
       new Compressor(file, {
         drew(ctx, canvas) {
           ctx.fillStyle = "#fff";
-          ctx.font = `${self.getFontSize(canvas)}px ${self.watermark.font}`;
+          ctx.font = `${self.getFontSize(canvas, self.watermark.size)}px ${
+            self.watermark.font
+          }`;
           ctx.textAlign = "right";
           ctx.fillText(
             `${self.watermark.text}`,
@@ -121,46 +106,14 @@ export default defineComponent({
         },
       });
     },
-    getFontSize(canvas: HTMLCanvasElement) {
-      if (this.watermark.size) {
-        if (canvas.width < canvas.height) {
-          return (canvas.width - canvas.height) / 8;
-        } else {
-          return (canvas.height - canvas.width) / 6;
-        }
-      } else {
-        return parseInt(this.watermark.size);
-      }
-    },
-    getCompressionSize(resultSize: number, fileSize: number): string {
-      return (
-        (100 - (resultSize / fileSize) * 100).toString().substring(0, 4) + "%"
-      );
-    },
+    getFontSize: getFontSize,
+    getCompressionSize: getCompressionSize,
     dropFiles(e: DragEvent) {
       e.preventDefault();
       this.uploadFile(e.dataTransfer?.files);
     },
     dragoverFiles(e: Event) {
       e.preventDefault();
-    },
-    deleteFile(indexToDelete: number) {
-      this.initialFiles = this.initialFiles.filter((file, index) => {
-        return index != indexToDelete;
-      });
-    },
-    deleteAllFiles() {
-      this.initialFiles.length = 0;
-    },
-    downloadAllFiles() {
-      let zip = new JSZip();
-      let img = zip.folder("images");
-      this.initialFiles.forEach((file) => {
-        img?.file(file.name, file.compressedFile);
-      });
-      zip.generateAsync({ type: "blob" }).then(function (content) {
-        saveAs(content, "files.zip");
-      });
     },
   },
   mounted() {
@@ -218,36 +171,10 @@ export default defineComponent({
   .add-files-label:hover {
     background-color: #ef3f3f;
   }
-  .files-list {
-    width: 100%;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-  }
-  .additional-files-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-left: 5px;
-    margin-right: 10px;
-  }
-  .title {
-    color: white;
-    font-size: 4.5vw;
-    transform: translate(-50%, -50%);
-    position: relative;
-    top: 40%;
-    left: 50%;
-    width: 100%;
-  }
-  .additional-files-info {
-    font-size: 1.3vw;
-    .download-files {
-      cursor: pointer;
-    }
-    .delete-files {
-      cursor: pointer;
-    }
+}
+@media only screen and (max-width: 700px) {
+  .container {
+    width: 95%;
   }
 }
 </style>
