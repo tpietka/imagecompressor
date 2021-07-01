@@ -1,5 +1,10 @@
 <template>
-  <Main />
+  <div class="navbar">
+    <h2>PhotoOptim</h2>
+  </div>
+  <div class="main">
+    <Main />
+  </div>
 </template>
 
 <script lang="ts">
@@ -23,12 +28,27 @@ export default defineComponent({
   color: #2c3e50;
 }
 body {
-  background: url('') no-repeat center center fixed;
-  background-size: cover;
-  width:100%;
-  height:100vh;
-  -moz-background-size: cover;
-  -webkit-background-size: cover;
-  overflow: hidden;
+  background-color: #fffff8;
+  width: 100%;
+  margin: 0;
+  height: 100%;
+}
+.navbar {
+  width: 100%;
+  height: 50px;
+  background-color: #005bab;
+  display: flex;
+  align-items: center;
+  h2 {
+    width: 70%;
+    color: white;
+    margin: auto;
+    text-align: left;
+
+  }
+}
+.main {
+  width: 70%;
+  margin: auto;
 }
 </style>
