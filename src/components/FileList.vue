@@ -4,13 +4,11 @@
       <Image :index="index" :imageFile="file" @remove-file="deleteFile" />
     </template>
     <div class="additional-files-info" v-if="uploadedFiles">
-      <div>Plików: {{ filesCount }}</div>
+      <div>pliki: {{ filesCount }}</div>
       <div class="download-files" @click="downloadAllFiles">
-        Pobierz wszystkie pliki
+        pobierz wszystkie
       </div>
-      <div class="delete-files" @click="deleteAllFiles">
-        Usuń wszystkie pliki
-      </div>
+      <div class="delete-files" @click="deleteAllFiles">usuń wszystkie</div>
     </div>
   </div>
 </template>
@@ -69,8 +67,6 @@ export default defineComponent({
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .files-list {
-  width: 100%;
-  background-color: white;
   display: flex;
   flex-direction: column;
 }
@@ -91,9 +87,10 @@ export default defineComponent({
   width: 100%;
 }
 .additional-files-info {
-  font-size: 1.3vw;
   .download-files {
     cursor: pointer;
+    margin-left: auto;
+    margin-right: 20px;
   }
   .delete-files {
     cursor: pointer;

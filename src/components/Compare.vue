@@ -1,6 +1,8 @@
 <template>
-  <div class="modal">
-    <button class="close" @click="$emit('close-comparison')">X</button>
+  <div @click.self="$emit('close-comparison')" class="modal">
+    <div class="close" @click="$emit('close-comparison')">
+      <img src="../assets/close2.svg" />
+    </div>
     <div id="image-compare">
       <img :src="url" alt="" />
       <img :src="compressedUrl" alt="" />
@@ -79,8 +81,10 @@ export default defineComponent({
 }
 .close {
   position: absolute;
-  right: 10px;
+  right: 3.5%;
   z-index: 4;
-  top: 0;
+  width: 50px;
+  cursor: pointer;
+  top: 1%;
 }
 </style>

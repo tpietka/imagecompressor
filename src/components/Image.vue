@@ -15,16 +15,15 @@
       {{ imageFile?.savedOnCompression }}
     </div>
     <div class="actions">
-      <!-- <img @click="updateFile(index)" class="action-icon" src="../assets/delete.svg"/> -->
       <a
         :href="getImageUrl(imageFile?.compressedFile)"
         :download="imageFile?.name"
-        ><img class="action-icon" src="../assets/download.svg"
+        ><img class="action-icon" src="../assets/download2.svg"
       /></a>
       <img
         @click="removeFile(index)"
         class="action-icon"
-        src="../assets/delete.svg"
+        src="../assets/close2.svg"
       />
     </div>
   </div>
@@ -37,7 +36,7 @@
 import { defineComponent, PropType } from "vue";
 import { ImageFile } from "../types";
 import Compare from "./Compare.vue";
-import { prettySize } from "../helpers/shared";
+import { prettySize, compressImage } from "../helpers/shared";
 export default defineComponent({
   components: { Compare },
   name: "Image",
@@ -60,14 +59,10 @@ export default defineComponent({
       }
     },
     prettySize: prettySize,
+    compressImage: compressImage,
     removeFile(indexToDelete: number | undefined) {
       if (indexToDelete != undefined) {
         this.$emit("remove-file", indexToDelete);
-      }
-    },
-    updateFile(indexToUpdate: number | undefined) {
-      if (indexToUpdate != undefined) {
-        this.$emit("update-file", indexToUpdate);
       }
     },
   },
@@ -100,14 +95,14 @@ export default defineComponent({
     justify-content: flex-end;
     align-items: center;
     a {
-      width: 20px;
-      height: 20px;
-      margin-right: 5px;
+      width: 25px;
+      height: 25px;
+      margin-right: 10px;
     }
     .action-icon {
-      width: 20px;
-      height: 20px;
-      margin: 0 5px 0 0;
+      width: 25px;
+      height: 25px;
+      margin: 0 10px 0 0;
       cursor: pointer;
     }
   }
