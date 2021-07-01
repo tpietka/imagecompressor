@@ -1,21 +1,16 @@
 <template>
-  <div class="menu">
-    {{ options.quality }}
-    <input
-      class="quality-slider"
-      type="range"
-      v-model="options.quality"
-      min="0.1"
-      max="1.0"
-      step="0.1"
-    />
-  </div>
   <div class="container">
-    <h1 class="title">Kompresuj pliki jpg</h1>
     <div class="submit-files">
       <div class="files-input" @dragover="dragoverFiles" @drop="dropFiles">
-        Upuść tutaj pliki lub dodaj je klikając na przycisk
+        <div class="upload-text">
+          <h3>upuść pliki tutaj...</h3>
+        </div>
       </div>
+      <label for="filesToCompress">
+        <div class="upload-icon">
+          <img src="../assets/upload.svg" />
+        </div>
+      </label>
       <input
         type="file"
         multiple
@@ -23,35 +18,130 @@
         id="filesToCompress"
         accept=".jpg, .jpeg, .png"
       />
-      <label class="add-files-label" for="filesToCompress">Dodaj</label>
     </div>
-    <FileList v-model:files="initialFiles"></FileList>
+    <div class="basic-settings">
+      <div>poziom kompresji:</div>
+      <input
+        class="compression-radio"
+        id="high"
+        name="compression"
+        type="radio"
+        value="0.4"
+        v-model="options.quality"
+      />
+      <label class="radio-btn-label" for="high">wysoka</label>
+      <input
+        class="compression-radio"
+        id="medium"
+        name="compression"
+        type="radio"
+        checked
+        value="0.6"
+        v-model="options.quality"
+      />
+      <label class="radio-btn-label" for="medium">średnia</label>
+      <input
+        class="compression-radio"
+        id="low"
+        name="compression"
+        type="radio"
+        value="0.8"
+        v-model="options.quality"
+      />
+      <label class="radio-btn-label" for="low">niska</label>
+      <div class="more-options-button" @click="moreOptions = !moreOptions">
+        <div class="more-options-button" v-if="!moreOptions">
+          <span>opcje szczegółowe</span>
+          <img class="arrow" src="../assets/down-arrow.svg" />
+        </div>
+        <div class="more-options-button" v-else>
+          <span>opcje szczegółowe</span>
+          <img class="arrow" src="../assets/up-arrow.svg" />
+        </div>
+      </div>
+    </div>
+    <div class="advanced-settings" v-if="moreOptions">
+      <div class="field">
+        <input
+          id="watermark"
+          type="text"
+          name="watermark"
+          v-model="watermark.text"
+        />
+        <label class="radio-btn-label" for="watermark">watermark</label>
+      </div>
+      <div class="fields">
+        <div class="field">
+          <input
+            id="minWidth"
+            type="text"
+            name="minWidth"
+            v-model="options.minWidth"
+          />
+          <label class="radio-btn-label" for="minWidth">min. szerokość</label>
+        </div>
+        <div class="field">
+          <input
+            id="maxWidth"
+            type="text"
+            name="maxWidth"
+            v-model="options.maxWidth"
+          />
+          <label class="radio-btn-label" for="maxWidth">max. szerokość</label>
+        </div>
+        <div class="field">
+          <input
+            id="minHeight"
+            type="text"
+            name="minHeight"
+            v-model="options.minHeight"
+          />
+          <label class="radio-btn-label" for="minHeight">min. wysokość</label>
+        </div>
+        <div class="field">
+          <input
+            id="maxHeight"
+            type="text"
+            name="maxHeight"
+            v-model="options.maxHeight"
+          />
+          <label class="radio-btn-label" for="maxHeight">max. wysokość</label>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="field">
+          <input type="checkbox" id="checkOrientation" />
+          <label for="checkOrientation">sprawdź orientację</label>
+        </div>
+        <div class="field">
+          <input type="checkbox" id="strict" />
+          <label for="strict">rygorystystyczny</label>
+        </div>
+      </div>
+    </div>
   </div>
+  <FileList v-model:files="initialFiles"></FileList>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Compressor from "compressorjs";
-import { ImageFile } from "../types";
-import { getFontSize, getCompressionSize } from "../helpers/shared";
+import { ImageFile, Watermark, CompressorOptions } from "../types";
+import { compressImage } from "../helpers/shared";
 import FileList from "./FileList.vue";
+//import Settings from "./Settings.vue";
 
 export default defineComponent({
   name: "Main",
   components: {
     FileList,
+    //Settings,
   },
   data() {
     return {
       initialFiles: [] as ImageFile[],
-      watermark: {
-        size: "",
-        text: "",
-        font: "Arial",
-      },
-      options: {
-        quality: "0.5",
-      },
+      watermark: {} as Watermark,
+      options: {} as CompressorOptions,
+      moreOptions: false,
     };
   },
   computed: {
@@ -66,48 +156,20 @@ export default defineComponent({
           if (selectedFiles.length < 1) {
             return;
           } else {
-            this.compressImage(file);
+            this.compressImage(
+              file,
+              null,
+              this.watermark,
+              this.options,
+              this.initialFiles
+            );
           }
         });
       }
       (document.querySelector("#filesToCompress") as HTMLInputElement).value =
         "";
     },
-    compressImage(file: File | Blob) {
-      var self = this;
-      new Compressor(file, {
-        drew(ctx, canvas) {
-          ctx.fillStyle = "#fff";
-          ctx.font = `${self.getFontSize(canvas, self.watermark.size)}px ${
-            self.watermark.font
-          }`;
-          ctx.textAlign = "right";
-          ctx.fillText(
-            `${self.watermark.text}`,
-            canvas.width - 10,
-            canvas.height - 10
-          );
-        },
-        strict: true,
-        checkOrientation: true,
-        quality: Number(self.options.quality),
-        convertSize: 2000000,
-        success(result) {
-          var imageFile: ImageFile = {
-            name: (file as File).name,
-            file: file,
-            compressedFile: result,
-            savedOnCompression: self.getCompressionSize(result.size, file.size),
-          };
-          self.initialFiles.push(imageFile);
-        },
-        error(err) {
-          console.log(err.message);
-        },
-      });
-    },
-    getFontSize: getFontSize,
-    getCompressionSize: getCompressionSize,
+    compressImage: compressImage,
     dropFiles(e: DragEvent) {
       e.preventDefault();
       this.uploadFile(e.dataTransfer?.files);
@@ -136,40 +198,94 @@ export default defineComponent({
   align-items: center;
 }
 .container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 75%;
-  @include centered-flex;
-  flex-direction: column;
+  margin: auto;
   .submit-files {
     @include centered-flex;
     width: 100%;
+    margin-top: 50px;
+    margin-bottom: 20px;
   }
   .files-input {
+    flex-direction: column;
     width: 100%;
     font-size: 1.5vw;
-    height: 50px;
+    height: 100px;
+    border: dotted #005bab 2px;
+    border-radius: 10px;
     background-color: white;
     @include centered-flex;
     cursor: auto;
   }
+  .upload-icon {
+    width: 100px;
+    border-radius: 10px;
+    background-image: linear-gradient(to bottom right, #005bab, #6eade5);
+    border: 2px solid #005bab;
+    height: 100px;
+    position: relative;
+    margin-left: 20px;
+    cursor: pointer;
+    img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: translate(20%, 25%);
+      height: 70%;
+      margin: auto;
+    }
+  }
+  .upload-text {
+    display: flex;
+    align-items: center;
+    .add-files-label {
+      cursor: pointer;
+      font-size: 20px;
+      margin-left: 5px;
+      color: brown;
+    }
+  }
   .files-input:focus {
     outline-width: 0;
   }
-  .add-files-label {
-    //background-image: linear-gradient(#ef3f5a, white);
-    background-color: #ef3f5a;
-    color: #fff;
-    width: 5%;
-    height: 50px;
-    padding: 0 20px;
-    @include centered-flex;
-    cursor: pointer;
+  .basic-settings {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    .compression-radio {
+      margin-left: 3%;
+      cursor: pointer;
+    }
+    .compression-radio {
+      cursor: pointer;
+    }
+    .radio-btn-label {
+      cursor: pointer;
+    }
+    .more-options-button {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      cursor: pointer;
+    }
   }
-  .add-files-label:hover {
-    background-color: #ef3f3f;
+  .arrow {
+    width: 20px;
+    height: 20px;
+  }
+  .advanced-settings {
+    background-color: #6eade5;
+    display: flex;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+  }
+  .fields {
+    display: flex;
+    flex-direction: column;
+  }
+  .fields-labels {
+    display: flex;
+    flex-direction: row;
   }
 }
 @media only screen and (max-width: 700px) {
