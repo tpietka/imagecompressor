@@ -1,5 +1,7 @@
 # imagecompressor
 
+Test project to learn vue and typescript.
+
 ## Project setup
 ```
 npm install
