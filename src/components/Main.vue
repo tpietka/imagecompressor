@@ -158,7 +158,6 @@ export default defineComponent({
           } else {
             this.compressImage(
               file,
-              null,
               this.watermark,
               this.options,
               this.initialFiles

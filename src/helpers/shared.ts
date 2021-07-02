@@ -1,3 +1,6 @@
+import { ImageFile, Watermark, CompressorOptions } from "../types";
+import Compressor from "compressorjs";
+
 export function prettySize(size: number | undefined): string {
   const kilobyte = 1024;
   const megabyte = kilobyte * kilobyte;
@@ -19,9 +22,9 @@ export function getFontSize(
 ): number {
   if (watermarkSize) {
     if (canvas.width < canvas.height) {
-      return (canvas.width - canvas.height) / 8;
+      return ((canvas.width - canvas.height) * parseInt(watermarkSize)) / 8;
     } else {
-      return (canvas.height - canvas.width) / 6;
+      return ((canvas.height - canvas.width) * parseInt(watermarkSize)) / 6;
     }
   } else {
     return parseInt(watermarkSize);
@@ -33,4 +36,42 @@ export function getCompressionSize(
   fileSize: number
 ): string {
   return (100 - (resultSize / fileSize) * 100).toString().substring(0, 4) + "%";
+}
+
+export function compressImage(
+  file: File | Blob,
+  watermark: Watermark,
+  options: CompressorOptions,
+  filesArray: ImageFile[]
+): void {
+  //const self = this;
+  new Compressor(file, {
+    drew(ctx, canvas) {
+      ctx.fillStyle = "#fff";
+      ctx.font = `10px ${watermark.font}`;
+      //ctx.font = `${getFontSize(canvas, watermark.size)}px ${watermark.font}`;
+      ctx.textAlign = "right";
+      ctx.fillText(`${watermark.text}`, canvas.width - 50, canvas.height - 10);
+    },
+    minWidth: Number(options.minWidth),
+    maxWidth: Number(options.maxWidth),
+    minHeight: Number(options.minHeight),
+    maxHeight: Number(options.maxHeight),
+    strict: options.strict,
+    checkOrientation: options.checkOrientation,
+    quality: Number(options.quality),
+    convertSize: Number(options.convertSize),
+    success(result) {
+      const imageFile: ImageFile = {
+        name: (file as File).name,
+        file: file,
+        compressedFile: result,
+        savedOnCompression: getCompressionSize(result.size, file.size),
+      };
+      filesArray.push(imageFile);
+    },
+    error(err) {
+      console.log(err.message);
+    },
+  });
 }
