@@ -4,7 +4,7 @@
       <Image :index="index" :imageFile="file" @remove-file="deleteFile" />
     </template>
     <div class="additional-files-info" v-if="uploadedFiles">
-      <div>pliki: {{ filesCount }}</div>
+      <div>files: {{ filesCount }}</div>
       <div class="download-files" @click="downloadAllFiles">download all</div>
       <div class="delete-files" @click="deleteAllFiles">remove all</div>
     </div>

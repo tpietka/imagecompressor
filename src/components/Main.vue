@@ -61,74 +61,23 @@
       </div>
     </div>
     <div class="advanced-settings" v-if="moreOptions">
-      <div class="fields">
-        <div class="field">
-          <input id="minWidth" type="text" name="minWidth" v-model="options.minWidth" />
-          <label class="radio-btn-label" for="minWidth">min. width</label>
-        </div>
-        <div class="field">
-          <input id="maxWidth" type="text" name="maxWidth" v-model="options.maxWidth" />
-          <label class="radio-btn-label" for="maxWidth">max. width</label>
-        </div>
-        <div class="field">
-          <input
-            id="minHeight"
-            type="text"
-            name="minHeight"
-            v-model="options.minHeight"
-          />
-          <label class="radio-btn-label" for="minHeight">min. height</label>
-        </div>
-        <div class="field">
-          <input
-            id="maxHeight"
-            type="text"
-            name="maxHeight"
-            v-model="options.maxHeight"
-          />
-          <label class="radio-btn-label" for="maxHeight">max. height</label>
-        </div>
-      </div>
-      <div class="fields">
-        <div class="field">
-          <input type="checkbox" id="checkOrientation" />
-          <label for="checkOrientation">check orientation</label>
-        </div>
-        <div class="field">
-          <input type="checkbox" id="strict" />
-          <label for="strict">strict</label>
-        </div>
-      </div>
+      <Settings :options="options" />
     </div>
   </div>
   <file-list v-model:files="initialFiles"></file-list>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { ImageFile, CompressorOptions } from "../types";
 import { compressImage } from "../helpers/shared";
 import FileList from "./FileList.vue";
-//import Settings from "./Settings.vue";
+import Settings from "./Settings.vue";
 
 let initialFiles = ref([] as ImageFile[]);
 let options = ref({
-  quality: "0.6",
-  minWidth: undefined,
-  maxWidth: undefined,
-  minHeight: undefined,
-  maxHeight: undefined,
-  width: undefined,
-  height: undefined,
-  mimeType: undefined,
-  convertSize: undefined,
-  strict: false,
-  checkOrientation: false,
 } as CompressorOptions);
 let moreOptions = ref(false);
-const filesCount = computed(() => {
-  return initialFiles.value.length;
-});
 const uploadFile = (selectedFiles: FileList | null | undefined) => {
   if (selectedFiles) {
     Array.from(selectedFiles).forEach((file) => {
@@ -238,21 +187,6 @@ onMounted(() => {
   .arrow {
     width: 20px;
     height: 20px;
-  }
-  .advanced-settings {
-    background-color: #6eade5;
-    display: flex;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-  }
-  .fields {
-    display: flex;
-    flex-direction: column;
-  }
-  .fields-labels {
-    display: flex;
-    flex-direction: row;
   }
 }
 @media only screen and (max-width: 700px) {

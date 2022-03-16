@@ -1,43 +1,60 @@
 <template>
-  <div class="menu">
-    {{ options.quality }}
-    <input
-      class="quality-slider"
-      type="range"
-      v-model="option.quality"
-      min="0.1"
-      max="1.0"
-      step="0.1"
-    />
-    <input type="text" v-model="watermark.text" />
-    <input type="text" v-model="watermark.size" />
+  <div class="fields">
+    <div class="field">
+      <input id="minWidth" type="text" name="minWidth" v-model="options.minWidth" />
+      <label class="option-label" for="minWidth">min. width</label>
+    </div>
+    <div class="field">
+      <input id="maxWidth" type="text" name="maxWidth" v-model="options.maxWidth" />
+      <label class="option-label" for="maxWidth">max. width</label>
+    </div>
+    <div class="field">
+      <input id="minHeight" type="text" name="minHeight" v-model="options.minHeight" />
+      <label class="option-label" for="minHeight">min. height</label>
+    </div>
+    <div class="field">
+      <input id="maxHeight" type="text" name="maxHeight" v-model="options.maxHeight" />
+      <label class="option-label" for="maxHeight">max. height</label>
+    </div>
+  </div>
+  <div class="fields">
+    <div class="field">
+      <input type="checkbox" id="checkOrientation" />
+      <label class="option-label" for="checkOrientation">check orientation</label>
+    </div>
+    <div class="field">
+      <input type="checkbox" id="strict" />
+      <label class="option-label" for="strict">strict</label>
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { Watermark, CompressorOptions } from "../types";
+<script setup lang="ts">
+import { defineProps, defineEmit } from "vue";
+import { CompressorOptions } from "../types";
 
-export default defineComponent({
-  name: "Settings",
-  props: {
-    options: Object as PropType<CompressorOptions>,
-  },
-  data() {
-    return {
-      option: {} as CompressorOptions,
-    };
-  },
-  watch: {
-    option: {
-      handler() {
-        this.$emit("update:options", this.option)
-      },
-      deep: true,
-    }
-  }
-});
+const props = defineProps<{
+  options: CompressorOptions;
+}>();
+const emit = defineEmit(["update:options"]);
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss"></style>
+<style>
+.advanced-settings {
+  background-color: #6eade5;
+  display: flex;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: white;
+  align-items: flex-start;
+}
+.option-label {
+  margin-left: 5px;
+}
+</style>
