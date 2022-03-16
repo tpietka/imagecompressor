@@ -1,4 +1,4 @@
-import { ImageFile, Watermark, CompressorOptions } from "../types";
+import { ImageFile, CompressorOptions } from "../types";
 import Compressor from "compressorjs";
 
 export function prettySize(size: number | undefined): string {
@@ -40,19 +40,10 @@ export function getCompressionSize(
 
 export function compressImage(
   file: File | Blob,
-  watermark: Watermark,
   options: CompressorOptions,
   filesArray: ImageFile[]
 ): void {
-  //const self = this;
   new Compressor(file, {
-    drew(ctx, canvas) {
-      ctx.fillStyle = "#fff";
-      ctx.font = `10px ${watermark.font}`;
-      //ctx.font = `${getFontSize(canvas, watermark.size)}px ${watermark.font}`;
-      ctx.textAlign = "right";
-      ctx.fillText(`${watermark.text}`, canvas.width - 50, canvas.height - 10);
-    },
     minWidth: Number(options.minWidth),
     maxWidth: Number(options.maxWidth),
     minHeight: Number(options.minHeight),

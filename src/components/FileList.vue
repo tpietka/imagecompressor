@@ -5,63 +5,52 @@
     </template>
     <div class="additional-files-info" v-if="uploadedFiles">
       <div>pliki: {{ filesCount }}</div>
-      <div class="download-files" @click="downloadAllFiles">
-        pobierz wszystkie
-      </div>
-      <div class="delete-files" @click="deleteAllFiles">usuń wszystkie</div>
+      <div class="download-files" @click="downloadAllFiles">download all</div>
+      <div class="delete-files" @click="deleteAllFiles">remove all</div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
+<script setup lang="ts">
+import { ref, computed, defineProps, defineEmit } from "vue";
 import Image from "./Image.vue";
 import { ImageFile } from "../types";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
-export default defineComponent({
-  name: "Main",
-  components: {
-    Image,
-  },
-  props: {
-    files: Object as PropType<ImageFile[]>,
-  },
-  computed: {
-    filesCount(): number {
-      return this.files ? this.files.length : 0;
-    },
-    uploadedFiles(): boolean {
-      return this.files ? this.files.length > 0 : false;
-    },
-  },
-  methods: {
-    deleteAllFiles() {
-      this.$emit("update:files", []);
-    },
-    deleteFile(indexToDelete: number) {
-      if (this.files) {
-        var filesAfterRemove = this.files.filter((file, index) => {
-          return index != indexToDelete;
-        });
-        this.$emit("update:files", filesAfterRemove);
-      }
-    },
-    downloadAllFiles() {
-      let zip = new JSZip();
-      let img = zip.folder("images");
-      if (this.files) {
-        this.files.forEach((file) => {
-          img?.file(file.name, file.compressedFile);
-        });
-        zip.generateAsync({ type: "blob" }).then(function (content) {
-          saveAs(content, "files.zip");
-        });
-      }
-    },
-  },
+const props = defineProps<{
+  files: ImageFile[];
+}>();
+const emit = defineEmit(["update:files"]);
+const filesCount = computed((): number => {
+  return props.files ? props.files.length : 0;
 });
+const uploadedFiles = computed((): boolean => {
+  return props.files ? props.files.length > 0 : false;
+});
+const deleteAllFiles = () => {
+  emit("update:files", []);
+};
+const deleteFile = (indexToDelete: number) => {
+  if (props.files) {
+    var filesAfterRemove = props.files.filter((file, index) => {
+      return index != indexToDelete;
+    });
+    emit("update:files", filesAfterRemove);
+  }
+};
+const downloadAllFiles = () => {
+  let zip = new JSZip();
+  let img = zip.folder("images");
+  if (props.files) {
+    props.files.forEach((file) => {
+      img?.file(file.name, file.compressedFile);
+    });
+    zip.generateAsync({ type: "blob" }).then(function (content) {
+      saveAs(content, "files.zip");
+    });
+  }
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

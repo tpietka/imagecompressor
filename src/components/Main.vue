@@ -3,7 +3,7 @@
     <div class="submit-files">
       <div class="files-input" @dragover="dragoverFiles" @drop="dropFiles">
         <div class="upload-text">
-          <h3>upuść pliki tutaj...</h3>
+          <h3>drop files here...</h3>
         </div>
       </div>
       <label for="filesToCompress">
@@ -20,7 +20,7 @@
       />
     </div>
     <div class="basic-settings">
-      <div>poziom kompresji:</div>
+      <div>compression level:</div>
       <input
         class="compression-radio"
         id="high"
@@ -29,7 +29,7 @@
         value="0.4"
         v-model="options.quality"
       />
-      <label class="radio-btn-label" for="high">wysoka</label>
+      <label class="radio-btn-label" for="high">high</label>
       <input
         class="compression-radio"
         id="medium"
@@ -39,7 +39,7 @@
         value="0.6"
         v-model="options.quality"
       />
-      <label class="radio-btn-label" for="medium">średnia</label>
+      <label class="radio-btn-label" for="medium">medium</label>
       <input
         class="compression-radio"
         id="low"
@@ -48,46 +48,27 @@
         value="0.8"
         v-model="options.quality"
       />
-      <label class="radio-btn-label" for="low">niska</label>
+      <label class="radio-btn-label" for="low">low</label>
       <div class="more-options-button" @click="moreOptions = !moreOptions">
         <div class="more-options-button" v-if="!moreOptions">
-          <span>opcje szczegółowe</span>
+          <span>advanced settings</span>
           <img class="arrow" src="../assets/down-arrow.svg" />
         </div>
         <div class="more-options-button" v-else>
-          <span>opcje szczegółowe</span>
+          <span>advanced settings</span>
           <img class="arrow" src="../assets/up-arrow.svg" />
         </div>
       </div>
     </div>
     <div class="advanced-settings" v-if="moreOptions">
-      <div class="field">
-        <input
-          id="watermark"
-          type="text"
-          name="watermark"
-          v-model="watermark.text"
-        />
-        <label class="radio-btn-label" for="watermark">watermark</label>
-      </div>
       <div class="fields">
         <div class="field">
-          <input
-            id="minWidth"
-            type="text"
-            name="minWidth"
-            v-model="options.minWidth"
-          />
-          <label class="radio-btn-label" for="minWidth">min. szerokość</label>
+          <input id="minWidth" type="text" name="minWidth" v-model="options.minWidth" />
+          <label class="radio-btn-label" for="minWidth">min. width</label>
         </div>
         <div class="field">
-          <input
-            id="maxWidth"
-            type="text"
-            name="maxWidth"
-            v-model="options.maxWidth"
-          />
-          <label class="radio-btn-label" for="maxWidth">max. szerokość</label>
+          <input id="maxWidth" type="text" name="maxWidth" v-model="options.maxWidth" />
+          <label class="radio-btn-label" for="maxWidth">max. width</label>
         </div>
         <div class="field">
           <input
@@ -96,7 +77,7 @@
             name="minHeight"
             v-model="options.minHeight"
           />
-          <label class="radio-btn-label" for="minHeight">min. wysokość</label>
+          <label class="radio-btn-label" for="minHeight">min. height</label>
         </div>
         <div class="field">
           <input
@@ -105,87 +86,74 @@
             name="maxHeight"
             v-model="options.maxHeight"
           />
-          <label class="radio-btn-label" for="maxHeight">max. wysokość</label>
+          <label class="radio-btn-label" for="maxHeight">max. height</label>
         </div>
       </div>
       <div class="fields">
         <div class="field">
           <input type="checkbox" id="checkOrientation" />
-          <label for="checkOrientation">sprawdź orientację</label>
+          <label for="checkOrientation">check orientation</label>
         </div>
         <div class="field">
           <input type="checkbox" id="strict" />
-          <label for="strict">rygorystystyczny</label>
+          <label for="strict">strict</label>
         </div>
       </div>
     </div>
   </div>
-  <FileList v-model:files="initialFiles"></FileList>
+  <file-list v-model:files="initialFiles"></file-list>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { ImageFile, Watermark, CompressorOptions } from "../types";
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+import { ImageFile, CompressorOptions } from "../types";
 import { compressImage } from "../helpers/shared";
 import FileList from "./FileList.vue";
 //import Settings from "./Settings.vue";
 
-export default defineComponent({
-  name: "Main",
-  components: {
-    FileList,
-    //Settings,
-  },
-  data() {
-    return {
-      initialFiles: [] as ImageFile[],
-      watermark: {} as Watermark,
-      options: {} as CompressorOptions,
-      moreOptions: false,
-    };
-  },
-  computed: {
-    filesCount(): number {
-      return this.initialFiles.length;
-    },
-  },
-  methods: {
-    uploadFile(selectedFiles: FileList | null | undefined) {
-      if (selectedFiles) {
-        Array.from(selectedFiles).forEach((file) => {
-          if (selectedFiles.length < 1) {
-            return;
-          } else {
-            this.compressImage(
-              file,
-              this.watermark,
-              this.options,
-              this.initialFiles
-            );
-          }
-        });
+let initialFiles = ref([] as ImageFile[]);
+let options = ref({
+  quality: "0.6",
+  minWidth: undefined,
+  maxWidth: undefined,
+  minHeight: undefined,
+  maxHeight: undefined,
+  width: undefined,
+  height: undefined,
+  mimeType: undefined,
+  convertSize: undefined,
+  strict: false,
+  checkOrientation: false,
+} as CompressorOptions);
+let moreOptions = ref(false);
+const filesCount = computed(() => {
+  return initialFiles.value.length;
+});
+const uploadFile = (selectedFiles: FileList | null | undefined) => {
+  if (selectedFiles) {
+    Array.from(selectedFiles).forEach((file) => {
+      if (selectedFiles.length < 1) {
+        return;
+      } else {
+        compressImage(file, options.value, initialFiles.value);
       }
-      (document.querySelector("#filesToCompress") as HTMLInputElement).value =
-        "";
-    },
-    compressImage: compressImage,
-    dropFiles(e: DragEvent) {
-      e.preventDefault();
-      this.uploadFile(e.dataTransfer?.files);
-    },
-    dragoverFiles(e: Event) {
-      e.preventDefault();
-    },
-  },
-  mounted() {
-    let filesHtmlElement = document.querySelector(
-      "#filesToCompress"
-    ) as HTMLInputElement;
-    filesHtmlElement?.addEventListener("change", () => {
-      let files = filesHtmlElement?.files;
-      this.uploadFile(files);
     });
-  },
+  }
+  (document.querySelector("#filesToCompress") as HTMLInputElement).value = "";
+};
+const dropFiles = (e: DragEvent) => {
+  e.preventDefault();
+  uploadFile(e.dataTransfer?.files);
+};
+const dragoverFiles = (e: Event) => {
+  e.preventDefault();
+};
+onMounted(() => {
+  let filesHtmlElement = document.querySelector("#filesToCompress") as HTMLInputElement;
+  filesHtmlElement?.addEventListener("change", () => {
+    let files = filesHtmlElement?.files;
+    uploadFile(files);
+  });
 });
 </script>
 

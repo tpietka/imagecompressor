@@ -15,58 +15,41 @@
       {{ imageFile?.savedOnCompression }}
     </div>
     <div class="actions">
-      <a
-        :href="getImageUrl(imageFile?.compressedFile)"
-        :download="imageFile?.name"
+      <a :href="getImageUrl(imageFile?.compressedFile)" :download="imageFile?.name"
         ><img class="action-icon" src="../assets/download2.svg"
       /></a>
-      <img
-        @click="removeFile(index)"
-        class="action-icon"
-        src="../assets/close2.svg"
-      />
+      <img @click="removeFile(index)" class="action-icon" src="../assets/close2.svg" />
     </div>
   </div>
   <teleport v-if="compareFiles" to="body">
-    <Compare @close-comparison="compareFiles = false" :image="imageFile" />
+    <compare @close-comparison="compareFiles = false" :image="imageFile"></compare>
   </teleport>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
+<script setup lang="ts">
+import { defineProps, ref, defineEmit } from "vue";
 import { ImageFile } from "../types";
 import Compare from "./Compare.vue";
 import { prettySize, compressImage } from "../helpers/shared";
-export default defineComponent({
-  components: { Compare },
-  name: "Image",
-  props: {
-    imageFile: Object as PropType<ImageFile>,
-    index: Number,
-  },
-  data() {
-    return {
-      compareFiles: false,
-    };
-  },
-  emits: ["remove-file", "update-file"],
-  methods: {
-    getImageUrl(file: Blob | File | undefined) {
-      if (file != undefined) {
-        return URL.createObjectURL(file);
-      } else {
-        return "";
-      }
-    },
-    prettySize: prettySize,
-    compressImage: compressImage,
-    removeFile(indexToDelete: number | undefined) {
-      if (indexToDelete != undefined) {
-        this.$emit("remove-file", indexToDelete);
-      }
-    },
-  },
-});
+const props = defineProps<{
+  imageFile: ImageFile;
+  index: number;
+}>();
+const emit = defineEmit(["remove-file", "update-file"]);
+let compareFiles = ref(false);
+
+const getImageUrl = (file: Blob | File | undefined) => {
+  if (file != undefined) {
+    return URL.createObjectURL(file);
+  } else {
+    return "";
+  }
+};
+const removeFile = (indexToDelete: number | undefined) => {
+  if (indexToDelete != undefined) {
+    emit("remove-file", indexToDelete);
+  }
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
