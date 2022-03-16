@@ -16,21 +16,6 @@ export function prettySize(size: number | undefined): string {
   }
 }
 
-export function getFontSize(
-  canvas: HTMLCanvasElement,
-  watermarkSize: string
-): number {
-  if (watermarkSize) {
-    if (canvas.width < canvas.height) {
-      return ((canvas.width - canvas.height) * parseInt(watermarkSize)) / 8;
-    } else {
-      return ((canvas.height - canvas.width) * parseInt(watermarkSize)) / 6;
-    }
-  } else {
-    return parseInt(watermarkSize);
-  }
-}
-
 export function getCompressionSize(
   resultSize: number,
   fileSize: number
